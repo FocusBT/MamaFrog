@@ -1,16 +1,22 @@
+export const CONTRACT_ADDRESS = "0x760F7dF1441db508b2F354D991ba942c63262C9d";
 export const ABI = [
   {
     inputs: [
-      {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_priceFeedAddress",
-        type: "address",
-      },
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "uint256", name: "tokens", type: "uint256" },
+    ],
+    name: "transfer",
+    outputs: [{ internalType: "bool", name: "success", type: "bool" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+export const CONTRACT_ABI = [
+  {
+    inputs: [
+      { internalType: "address", name: "_tokenAddress", type: "address" },
+      { internalType: "address", name: "_priceFeedAddress", type: "address" },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
@@ -18,12 +24,7 @@ export const ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "newStatus",
-        type: "bool",
-      },
+      { indexed: false, internalType: "bool", name: "newStatus", type: "bool" },
     ],
     name: "ClaimStatusChanged",
     type: "event",
@@ -50,12 +51,7 @@ export const ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "newStatus",
-        type: "bool",
-      },
+      { indexed: false, internalType: "bool", name: "newStatus", type: "bool" },
     ],
     name: "SaleStatusChanged",
     type: "event",
@@ -95,12 +91,7 @@ export const ABI = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
+      { indexed: true, internalType: "address", name: "user", type: "address" },
       {
         indexed: false,
         internalType: "uint256",
@@ -153,13 +144,7 @@ export const ABI = [
   {
     inputs: [],
     name: "claimEnabled",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
@@ -187,58 +172,28 @@ export const ABI = [
   {
     inputs: [],
     name: "getLatestETHPrice",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "getTokenPriceInETH",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
+    outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
+    inputs: [{ internalType: "address", name: "", type: "address" }],
     name: "pendingTokens",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -265,37 +220,19 @@ export const ABI = [
   {
     inputs: [],
     name: "saleActive",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_enabled",
-        type: "bool",
-      },
-    ],
+    inputs: [{ internalType: "bool", name: "_enabled", type: "bool" }],
     name: "setClaimEnabled",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_status",
-        type: "bool",
-      },
-    ],
+    inputs: [{ internalType: "bool", name: "_status", type: "bool" }],
     name: "setSaleStatus",
     outputs: [],
     stateMutability: "nonpayable",
@@ -304,50 +241,26 @@ export const ABI = [
   {
     inputs: [],
     name: "token",
-    outputs: [
-      {
-        internalType: "contract IERC20",
-        name: "",
-        type: "address",
-      },
-    ],
+    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "tokenPriceInUSDT",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
     name: "totalSold",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
+    inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
@@ -355,11 +268,7 @@ export const ABI = [
   },
   {
     inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenPriceInUSDT",
-        type: "uint256",
-      },
+      { internalType: "uint256", name: "_tokenPriceInUSDT", type: "uint256" },
     ],
     name: "updateTokenPriceInUSDT",
     outputs: [],
@@ -369,13 +278,7 @@ export const ABI = [
   {
     inputs: [],
     name: "usdtToken",
-    outputs: [
-      {
-        internalType: "contract IERC20",
-        name: "",
-        type: "address",
-      },
-    ],
+    outputs: [{ internalType: "contract IERC20", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -386,8 +289,5 @@ export const ABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-  {
-    stateMutability: "payable",
-    type: "receive",
-  },
+  { stateMutability: "payable", type: "receive" },
 ];
