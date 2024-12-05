@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import Countdown from "@/components/Countdown";
 import {
-  BaseError,
   useAccount,
   useDisconnect,
   useEnsName,
@@ -40,7 +39,6 @@ export default function PresaleToken() {
 
   const {
     data: hash,
-    error,
     isPending,
     writeContract,
   } = useWriteContract({
@@ -50,7 +48,7 @@ export default function PresaleToken() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
-  const { data: ensName } = useEnsName({ address });
+//   const { data: ensName } = useEnsName({ address });
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -138,10 +136,11 @@ export default function PresaleToken() {
         },
         { onError: (err) => console.log("Transaction Error:", err) }
       );
-    } catch (err) {
-      console.error("Transaction error:", err);
-      alert(`Transaction failed: ${err.message || "Unknown error"}`);
-    }
+    } catch (err: unknown) {
+        console.error("Transaction error:", err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        alert(`Transaction failed: ${errorMessage}`);
+      }
   }
 
   // Don't render anything until mounted
