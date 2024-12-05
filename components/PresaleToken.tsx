@@ -64,6 +64,8 @@ export default function PresaleToken() {
     args: [address],
   });
 
+  const ethPriceInDecimal = ethPrice;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -161,13 +163,24 @@ export default function PresaleToken() {
           <p className={"font-semibold"}>
             USDT RAISED: <span className={""}>$68,019.29</span>
           </p>
+          <p className={"font-semibold"}>
+            INVESTED: <span className={""}>{ethPriceInDecimal}</span>
+          </p>
         </div>
         <div className={"px-1 flex items-center justify-center gap-2"}>
-          <hr className={"h-[2px] bg-secondary-foreground/70 w-full border-none"} />
-          <p className={"text-secondary-foreground/70 w-full text-nowrap text-sm"}>
+          <hr
+            className={"h-[2px] bg-secondary-foreground/70 w-full border-none"}
+          />
+          <p
+            className={
+              "text-secondary-foreground/70 w-full text-nowrap text-sm"
+            }
+          >
             1 $MAMAFROG = $0.00001854
           </p>
-          <hr className={"h-[2px] bg-secondary-foreground/70 w-full border-none"} />
+          <hr
+            className={"h-[2px] bg-secondary-foreground/70 w-full border-none"}
+          />
         </div>
         <FormField
           control={form.control}
@@ -201,7 +214,9 @@ export default function PresaleToken() {
                 <Input
                   placeholder="0"
                   type={"number"}
-                  className={"rounded-xl p-5 border-white border-[2px] text-white"}
+                  className={
+                    "rounded-xl p-5 border-white border-[2px] text-white"
+                  }
                   {...field}
                   readOnly
                 />
@@ -210,12 +225,16 @@ export default function PresaleToken() {
             </FormItem>
           )}
         />
-        <div className={"flex w-full justify-center items-center gap-2 flex-col"}>
+        <div
+          className={"flex w-full justify-center items-center gap-2 flex-col"}
+        >
           <div className={"flex flex-col w-full gap-2"}>
             <div className={"w-full flex-row flex gap-2"}>
               {!address && (
                 <Button
-                  className={"p-5 rounded-xl text-md font-weird text-2xl w-full"}
+                  className={
+                    "p-5 rounded-xl text-md font-weird text-2xl w-full"
+                  }
                   onClick={(event) => {
                     event.preventDefault();
                     open();
@@ -225,7 +244,9 @@ export default function PresaleToken() {
                 </Button>
               )}
               <Button
-                className={"p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"}
+                className={
+                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
+                }
                 type="submit"
                 disabled={isPending || !address}
                 variant="destructive"
@@ -234,7 +255,9 @@ export default function PresaleToken() {
                 {isPending ? "PURCHASING..." : "BUY NOW"}
               </Button>
               <Button
-                className={"p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"}
+                className={
+                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
+                }
                 disabled={true}
                 variant="destructive"
               >
@@ -243,7 +266,9 @@ export default function PresaleToken() {
             </div>
             {address && (
               <Button
-                className={"rounded-xl text-md font-weird text-xl w-full text-foreground/70"}
+                className={
+                  "rounded-xl text-md font-weird text-xl w-full text-foreground/70"
+                }
                 variant="ghost"
                 onClick={() => disconnect()}
               >
