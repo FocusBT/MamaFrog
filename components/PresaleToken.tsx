@@ -65,7 +65,7 @@ export default function PresaleToken() {
     args: [address],
   });
 
-  console.log("ETH Price", ethPrice);
+  //   console.log("ETH Price", ethPrice);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -123,12 +123,15 @@ export default function PresaleToken() {
     }
 
     try {
-      await writeContract({
-        address: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: "buyTokens",
-        args: [BigInt(token * 1e18)],
-      });
+      await writeContract(
+        {
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: "buyTokens",
+          args: [BigInt(token * 1e18)],
+        },
+        { onError: () => console.log("HAHAHAH") }
+      );
 
       console.log("Transaction sent:");
     } catch (err) {
@@ -256,21 +259,27 @@ export default function PresaleToken() {
                 {isPending ? <Loader2 className="animate-spin" /> : <></>}{" "}
                 {isPending ? "PURCHASING..." : "BUY NOW"}
               </Button>
+              <Button
+                className={
+                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
+                }
+                disabled={true}
+                variant={"destructive"}
+              >
+                {"CLAIM NOW"}
+              </Button>
             </div>
-            {typeof window !== "undefined" &&
-              (address ? (
-                <Button
-                  className={
-                    "rounded-xl text-md font-weird text-xl w-full text-foreground/70"
-                  }
-                  variant={"ghost"}
-                  onClick={() => disconnect()}
-                >
-                  DISCONNECT
-                </Button>
-              ) : (
-                <></>
-              ))}
+            {isClient && address && (
+              <Button
+                className={
+                  "rounded-xl text-md font-weird text-xl w-full text-foreground/70"
+                }
+                variant={"ghost"}
+                onClick={() => disconnect()}
+              >
+                DISCONNECT
+              </Button>
+            )}
             {isConfirming && <div>Waiting for confirmation...</div>}
             {isConfirmed && <div>Transaction confirmed.</div>}
           </div>
