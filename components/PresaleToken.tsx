@@ -28,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { config } from "@/lib/config";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constants";
-export const dynamic = "force-dynamic";
 
 const formSchema = z.object({
   input: z.coerce.number().min(0.01).max(100000),
@@ -37,7 +36,7 @@ const formSchema = z.object({
 
 export default function PresaleToken() {
   const [bnbPrice, setBnbPrice] = useState(0);
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const {
     data: hash,
@@ -65,8 +64,6 @@ export default function PresaleToken() {
     args: [address],
   });
 
-  //   console.log("ETH Price", ethPrice);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,11 +71,13 @@ export default function PresaleToken() {
       token: 0,
     },
   });
-  
+
+  // Handle mounting
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
+  // Fetch BNB price
   useEffect(() => {
     async function fetchBNBPrice() {
       try {
@@ -92,10 +91,15 @@ export default function PresaleToken() {
       }
     }
 
-    fetchBNBPrice().then();
-  }, []);
+    if (mounted) {
+      fetchBNBPrice();
+    }
+  }, [mounted]);
 
+  // Handle form calculations
   useEffect(() => {
+    if (!mounted) return;
+
     const subscription = form.watch((value) => {
       const { input } = value;
       if (bnbPrice > 0 && input && input > 0) {
@@ -106,38 +110,41 @@ export default function PresaleToken() {
       }
     });
     return () => subscription.unsubscribe();
-  }, [bnbPrice, form]);
+  }, [bnbPrice, form, mounted]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!address) {
       console.error("No wallet connected");
       return;
     }
-  
-    const { input, token } = values;
-  
-    if (!token || token <= 0 || isNaN(token)) {
-      console.error("Invalid token value:", token);
+
+    const { input } = values;
+
+    if (!input || input <= 0 || isNaN(input)) {
+      console.error("Invalid token value:", input);
       alert("Invalid token value. Please check your input.");
       return;
     }
-  
+
     try {
       writeContract(
         {
           address: CONTRACT_ADDRESS,
           abi: CONTRACT_ABI,
           functionName: "buyTokens",
-          value: BigInt(input * 1e18), // Send ETH value here
+          value: BigInt(input * 1e18),
         },
         { onError: (err) => console.log("Transaction Error:", err) }
       );
-  
-      console.log("Transaction sent:");
     } catch (err) {
       console.error("Transaction error:", err);
       alert(`Transaction failed: ${err.message || "Unknown error"}`);
     }
+  }
+
+  // Don't render anything until mounted
+  if (!mounted) {
+    return null;
   }
 
   return (
@@ -156,19 +163,11 @@ export default function PresaleToken() {
           </p>
         </div>
         <div className={"px-1 flex items-center justify-center gap-2"}>
-          <hr
-            className={"h-[2px] bg-secondary-foreground/70 w-full border-none"}
-          />
-          <p
-            className={
-              "text-secondary-foreground/70 w-full text-nowrap text-sm"
-            }
-          >
+          <hr className={"h-[2px] bg-secondary-foreground/70 w-full border-none"} />
+          <p className={"text-secondary-foreground/70 w-full text-nowrap text-sm"}>
             1 $MAMAFROG = $0.00001854
           </p>
-          <hr
-            className={"h-[2px] bg-secondary-foreground/70 w-full border-none"}
-          />
+          <hr className={"h-[2px] bg-secondary-foreground/70 w-full border-none"} />
         </div>
         <FormField
           control={form.control}
@@ -202,9 +201,7 @@ export default function PresaleToken() {
                 <Input
                   placeholder="0"
                   type={"number"}
-                  className={
-                    "rounded-xl p-5 border-white border-[2px] text-white"
-                  }
+                  className={"rounded-xl p-5 border-white border-[2px] text-white"}
                   {...field}
                   readOnly
                 />
@@ -213,32 +210,12 @@ export default function PresaleToken() {
             </FormItem>
           )}
         />
-        <div
-          className={"flex w-full justify-center items-center gap-2 flex-col"}
-        >
+        <div className={"flex w-full justify-center items-center gap-2 flex-col"}>
           <div className={"flex flex-col w-full gap-2"}>
             <div className={"w-full flex-row flex gap-2"}>
-              {/* {typeof window !== "undefined" &&
-                (address ? (
-                  <></>
-                ) : (
-                  <Button
-                    className={
-                      "p-5 rounded-xl text-md font-weird text-2xl w-full"
-                    }
-                    onClick={(event) => {
-                      event.preventDefault();
-                      open();
-                    }}
-                  >
-                    CONNECT WALLET
-                  </Button>
-                ))} */}
-              {isClient && !address && (
+              {!address && (
                 <Button
-                  className={
-                    "p-5 rounded-xl text-md font-weird text-2xl w-full"
-                  }
+                  className={"p-5 rounded-xl text-md font-weird text-2xl w-full"}
                   onClick={(event) => {
                     event.preventDefault();
                     open();
@@ -248,33 +225,26 @@ export default function PresaleToken() {
                 </Button>
               )}
               <Button
-                className={
-                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
-                }
-                type={"submit"}
+                className={"p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"}
+                type="submit"
                 disabled={isPending || !address}
-                variant={"destructive"}
+                variant="destructive"
               >
-                {" "}
-                {isPending ? <Loader2 className="animate-spin" /> : <></>}{" "}
+                {isPending ? <Loader2 className="animate-spin" /> : null}
                 {isPending ? "PURCHASING..." : "BUY NOW"}
               </Button>
               <Button
-                className={
-                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
-                }
+                className={"p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"}
                 disabled={true}
-                variant={"destructive"}
+                variant="destructive"
               >
-                {"CLAIM NOW"}
+                CLAIM NOW
               </Button>
             </div>
-            {isClient && address && (
+            {address && (
               <Button
-                className={
-                  "rounded-xl text-md font-weird text-xl w-full text-foreground/70"
-                }
-                variant={"ghost"}
+                className={"rounded-xl text-md font-weird text-xl w-full text-foreground/70"}
+                variant="ghost"
                 onClick={() => disconnect()}
               >
                 DISCONNECT
