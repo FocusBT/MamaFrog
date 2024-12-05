@@ -74,7 +74,7 @@ export default function PresaleToken() {
       token: 0,
     },
   });
-
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -113,26 +113,26 @@ export default function PresaleToken() {
       console.error("No wallet connected");
       return;
     }
-
+  
     const { input, token } = values;
-
+  
     if (!token || token <= 0 || isNaN(token)) {
       console.error("Invalid token value:", token);
       alert("Invalid token value. Please check your input.");
       return;
     }
-
+  
     try {
-      await writeContract(
+      writeContract(
         {
           address: CONTRACT_ADDRESS,
           abi: CONTRACT_ABI,
           functionName: "buyTokens",
-          args: [BigInt(token * 1e18)],
+          value: BigInt(input * 1e18), // Send ETH value here
         },
-        { onError: () => console.log("HAHAHAH") }
+        { onError: (err) => console.log("Transaction Error:", err) }
       );
-
+  
       console.log("Transaction sent:");
     } catch (err) {
       console.error("Transaction error:", err);
