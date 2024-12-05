@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { config } from "@/lib/config";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constants";
+import { formatEther } from "viem";
 
 const formSchema = z.object({
   input: z.coerce.number().min(0.01).max(100000),
@@ -48,7 +49,6 @@ export default function PresaleToken() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
-//   const { data: ensName } = useEnsName({ address });
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -62,7 +62,21 @@ export default function PresaleToken() {
     args: [address],
   });
 
-  const ethPriceInDecimal = ethPrice;
+  const { data: isClaimEnabled } = useReadContract({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "claimEnabled"
+  });
+
+
+    const ethPriceInDecimal = ethPrice 
+    ? Number(formatEther(ethPrice)).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    : "0.00";
+
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -111,6 +125,29 @@ export default function PresaleToken() {
     });
     return () => subscription.unsubscribe();
   }, [bnbPrice, form, mounted]);
+
+  async function claimTokens() {
+    if (!address) {
+      console.error("No wallet connected");
+      return;
+    }
+
+    try {
+      writeContract(
+        {
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: "claimTokens",
+        },
+        { onError: (err) => console.log("Transaction Error:", err) }
+      );
+    } catch (err: unknown) {
+      console.error("Transaction error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      alert(`Transaction failed: ${errorMessage}`);
+    }
+  }
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!address) {
@@ -163,7 +200,7 @@ export default function PresaleToken() {
             USDT RAISED: <span className={""}>$68,019.29</span>
           </p>
           <p className={"font-semibold"}>
-            INVESTED: <span className={""}>{ethPriceInDecimal}</span>
+            INVESTED: <span className={""}>{ethPriceInDecimal} $MAMAFROG</span>
           </p>
         </div>
         <div className={"px-1 flex items-center justify-center gap-2"}>
@@ -257,7 +294,11 @@ export default function PresaleToken() {
                 className={
                   "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
                 }
-                disabled={true}
+                onClick={(e)=> {
+                    e.preventDefault();
+                    claimTokens();
+                }}
+                disabled={!isClaimEnabled || !address}
                 variant="destructive"
               >
                 CLAIM NOW
