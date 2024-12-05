@@ -19,6 +19,7 @@ import {
   useAccount,
   useDisconnect,
   useEnsName,
+  useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -46,14 +47,25 @@ export default function PresaleToken() {
   } = useWriteContract({
     config,
   });
+
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
+
+  const { data: ethPrice } = useReadContract({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "pendingTokens",
+    args: [address],
+  });
+
+  console.log("ETH Price", ethPrice);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
