@@ -5,6 +5,7 @@ import WagmiProviderComp from "@/components/wgami-provider";
 import { cookieToInitialState } from "wagmi";
 import { config } from "@/lib/config";
 import { headers } from "next/headers";
+import { ToastContainer } from "react-toastify";
 
 const weird = localFont({
   src: "./fonts/file.woff2",
@@ -39,6 +40,17 @@ export default async function RootLayout({
         <WagmiProviderComp initialState={initialState}>
           {children}
         </WagmiProviderComp>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000} // 5 seconds
+          hideProgressBar
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </body>
     </html>
   );

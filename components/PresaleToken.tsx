@@ -28,6 +28,7 @@ import { Loader2 } from "lucide-react";
 import { config } from "@/lib/config";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constants";
 import { formatEther } from "viem";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   input: z.coerce.number().min(0.01).max(100000),
@@ -49,11 +50,15 @@ export default function PresaleToken() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
+  //   const { data: ensName } = useEnsName({ address });
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    isError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const { data: ethPrice } = useReadContract({
     abi: CONTRACT_ABI,
@@ -65,18 +70,15 @@ export default function PresaleToken() {
   const { data: isClaimEnabled } = useReadContract({
     abi: CONTRACT_ABI,
     address: CONTRACT_ADDRESS,
-    functionName: "claimEnabled"
+    functionName: "claimEnabled",
   });
 
-
-    const ethPriceInDecimal = ethPrice 
-    ? Number(formatEther(ethPrice)).toLocaleString('en-US', {
+  const ethPriceInDecimal = ethPrice
+    ? Number(formatEther(ethPrice)).toLocaleString("en-US", {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       })
     : "0.00";
-
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,6 +128,16 @@ export default function PresaleToken() {
     return () => subscription.unsubscribe();
   }, [bnbPrice, form, mounted]);
 
+  useEffect(() => {
+    if (isConfirmed) {
+      toast.success(`Transaction confirmed. ${hash}`);
+    }
+
+    if (isError) {
+      toast.error("Transaction failed.");
+    }
+  }, [hash, isConfirmed, isError]);
+
   async function claimTokens() {
     if (!address) {
       console.error("No wallet connected");
@@ -139,7 +151,9 @@ export default function PresaleToken() {
           abi: CONTRACT_ABI,
           functionName: "claimTokens",
         },
-        { onError: (err) => console.log("Transaction Error:", err) }
+        {
+          onError: () => toast.success("Transaction failed"),
+        }
       );
     } catch (err: unknown) {
       console.error("Transaction error:", err);
@@ -147,7 +161,6 @@ export default function PresaleToken() {
       alert(`Transaction failed: ${errorMessage}`);
     }
   }
-
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!address) {
@@ -174,10 +187,10 @@ export default function PresaleToken() {
         { onError: (err) => console.log("Transaction Error:", err) }
       );
     } catch (err: unknown) {
-        console.error("Transaction error:", err);
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        alert(`Transaction failed: ${errorMessage}`);
-      }
+      console.error("Transaction error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      alert(`Transaction failed: ${errorMessage}`);
+    }
   }
 
   // Don't render anything until mounted
@@ -294,9 +307,9 @@ export default function PresaleToken() {
                 className={
                   "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
                 }
-                onClick={(e)=> {
-                    e.preventDefault();
-                    claimTokens();
+                onClick={(e) => {
+                  e.preventDefault();
+                  claimTokens();
                 }}
                 disabled={!isClaimEnabled || !address}
                 variant="destructive"
