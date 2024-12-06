@@ -327,20 +327,20 @@ export default function PresaleToken() {
                 {isPending ? <Loader2 className="animate-spin" /> : null}
                 {isPending ? "PURCHASING..." : "BUY NOW"}
               </Button>
-              <Button
-                className={
-                  "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
-                }
-                onClick={(e) => {
-                  e.preventDefault();
-                  claimTokens();
-                }}
-                disabled={!isClaimEnabled || !address}
-                variant="destructive"
-              >
-                CLAIM NOW
-              </Button>
             </div>
+            <Button
+              className={
+                "p-5 rounded-xl text-md font-weird font-bold text-2xl w-full border-none transition-all"
+              }
+              onClick={(e) => {
+                e.preventDefault();
+                claimTokens();
+              }}
+              disabled={!isClaimEnabled || !address}
+              variant="destructive"
+            >
+              CLAIM NOW
+            </Button>
             {address && (
               <Button
                 className={
