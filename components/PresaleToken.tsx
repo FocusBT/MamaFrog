@@ -28,11 +28,16 @@ import { config } from "@/lib/config";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constants";
 import { formatEther } from "viem";
 import { toast } from "react-toastify";
+import ProgressBar from "./ProgressBar";
+import { formatNumber } from "@/utils/misc";
 
 const formSchema = z.object({
   input: z.coerce.number().min(0.0000000000001).max(100000),
   token: z.coerce.number().min(0.0000000000001).max(1000000),
 });
+
+const USDT_RAISED = 68019.29;
+const USDT_TO_RAISE = 100000;
 
 export default function PresaleToken() {
   const [bnbPrice, setBnbPrice] = useState(0);
@@ -212,11 +217,6 @@ export default function PresaleToken() {
     }
   }
 
-  // Don't render anything until mounted
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <Form {...form}>
       <form
@@ -229,11 +229,16 @@ export default function PresaleToken() {
           </h2>
           <Countdown targetDate={"2025-01-01T00:00:00Z"} />
           <p className={"font-semibold"}>
-            USDT RAISED: <span className={""}>$68,019.29</span>
+            USDT RAISED:{" "}
+            <span className={""}>{`$${formatNumber(USDT_RAISED)}`}</span>
           </p>
-          <p className={"font-semibold"}>
-            INVESTED: <span className={""}>{ethPriceInDecimal} $MAMAFROG</span>
-          </p>
+          <ProgressBar progress={(USDT_RAISED / USDT_TO_RAISE) * 100} />
+          {address && (
+            <p className={"font-semibold"}>
+              INVESTED:{" "}
+              <span className={""}>{ethPriceInDecimal} $MAMAFROG</span>
+            </p>
+          )}
         </div>
         <div className={"px-1 flex items-center justify-center gap-2"}>
           <hr
@@ -350,7 +355,7 @@ export default function PresaleToken() {
             {isConfirming && <div>Waiting for confirmation...</div>}
             {isConfirmed && (
               <div>
-                Transaction confirmed ✅ View on  {" "}
+                Transaction confirmed ✅ View on{" "}
                 <a
                   href={`https://bscscan.com/tx/${hash}`}
                   target="_blank"
