@@ -30,15 +30,14 @@ import { formatEther } from "viem";
 import { toast } from "react-toastify";
 
 const formSchema = z.object({
-  input: z.coerce.number().min(0.01).max(100000),
-  token: z.coerce.number().min(0.001).max(1000000),
+  input: z.coerce.number().min(0.0000000000001).max(100000),
+  token: z.coerce.number().min(0.0000000000001).max(1000000),
 });
 
 export default function PresaleToken() {
   const [bnbPrice, setBnbPrice] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [tokenPriceInUSD, setTokenPriceInUSD] = useState("0");
-  
 
   const {
     data: hash,
@@ -80,8 +79,8 @@ export default function PresaleToken() {
     functionName: "getTokenPriceInETH",
   });
 
-
-  const ethPriceInDecimal = ethPrice && typeof ethPrice === 'bigint'
+  const ethPriceInDecimal =
+    ethPrice && typeof ethPrice === "bigint"
       ? Number(formatEther(ethPrice)).toLocaleString("en-US", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
@@ -127,23 +126,26 @@ export default function PresaleToken() {
     const subscription = form.watch((value) => {
       const { input } = value;
       if (bnbPrice > 0 && input && input > 0) {
-        const calculatedToken = input / bnbPrice / 0.00001854;
+        const usdAmount = input * bnbPrice;
+        const calculatedToken = usdAmount / Number(tokenPriceInUSD);
         if (form.getValues("token") !== calculatedToken) {
           form.setValue("token", calculatedToken);
         }
       }
     });
     return () => subscription.unsubscribe();
-  }, [bnbPrice, form, mounted]);
+  }, [bnbPrice, form, mounted, tokenPriceInUSD]);
 
   useEffect(() => {
     if (priceInBNBWei && bnbPrice > 0) {
-      const priceInBNB = priceInBNBWei && typeof priceInBNBWei === 'bigint' ? Number(formatEther(priceInBNBWei)) : 0;
+      const priceInBNB =
+        priceInBNBWei && typeof priceInBNBWei === "bigint"
+          ? Number(formatEther(priceInBNBWei))
+          : 0;
       const priceInUSD = (priceInBNB * bnbPrice).toFixed(7);
       setTokenPriceInUSD(priceInUSD);
     }
   }, [priceInBNBWei, bnbPrice]);
-
 
   useEffect(() => {
     if (isConfirmed) {
@@ -346,7 +348,19 @@ export default function PresaleToken() {
               </Button>
             )}
             {isConfirming && <div>Waiting for confirmation...</div>}
-            {isConfirmed && <div>Transaction confirmed.</div>}
+            {isConfirmed && (
+              <div>
+                Transaction confirmed ✅ View on  {" "}
+                <a
+                  href={`https://bscscan.com/tx/${hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:text-blue-700 underline"
+                >
+                  BscScan
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </form>
