@@ -17,7 +17,6 @@ import Countdown from "@/components/Countdown";
 import {
   useAccount,
   useDisconnect,
-  useEnsName,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -38,6 +37,8 @@ const formSchema = z.object({
 export default function PresaleToken() {
   const [bnbPrice, setBnbPrice] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [tokenPriceInUSD, setTokenPriceInUSD] = useState("0");
+  
 
   const {
     data: hash,
@@ -73,12 +74,19 @@ export default function PresaleToken() {
     functionName: "claimEnabled",
   });
 
-  const ethPriceInDecimal = ethPrice
-    ? Number(formatEther(ethPrice)).toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    : "0.00";
+  const { data: priceInBNBWei } = useReadContract({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "getTokenPriceInETH",
+  });
+
+
+  const ethPriceInDecimal = ethPrice && typeof ethPrice === 'bigint'
+      ? Number(formatEther(ethPrice)).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      : "0.00";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -127,6 +135,15 @@ export default function PresaleToken() {
     });
     return () => subscription.unsubscribe();
   }, [bnbPrice, form, mounted]);
+
+  useEffect(() => {
+    if (priceInBNBWei && bnbPrice > 0) {
+      const priceInBNB = priceInBNBWei && typeof priceInBNBWei === 'bigint' ? Number(formatEther(priceInBNBWei)) : 0;
+      const priceInUSD = (priceInBNB * bnbPrice).toFixed(7);
+      setTokenPriceInUSD(priceInUSD);
+    }
+  }, [priceInBNBWei, bnbPrice]);
+
 
   useEffect(() => {
     if (isConfirmed) {
@@ -225,7 +242,7 @@ export default function PresaleToken() {
               "text-secondary-foreground/70 w-full text-nowrap text-sm"
             }
           >
-            1 $MAMAFROG = $0.00001854
+            1 $MAMAFROG = ${tokenPriceInUSD}
           </p>
           <hr
             className={"h-[2px] bg-secondary-foreground/70 w-full border-none"}
